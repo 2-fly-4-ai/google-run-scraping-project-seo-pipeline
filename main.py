@@ -5,7 +5,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from flask import Flask, request, jsonify
-from zyte_smartproxy_selenium import webdriver as zyte_webdriver
+from zyte_smartproxy_selenium import webdriver
 import time
 import json
 import base64
@@ -27,7 +27,7 @@ def get_driver():
     # chrome_options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
     
     # Use Zyte SmartProxy Selenium to initialize Chrome with proxy
-    driver = zyte_webdriver.Chrome(
+    driver = webdriver.Chrome(
         # chrome_options=chrome_options,
         spm_options={'spm_apikey': SPM_APIKEY}
     )
