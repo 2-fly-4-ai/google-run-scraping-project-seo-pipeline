@@ -36,8 +36,18 @@ def download_mp3():
     driver = None
     try:
         driver = get_driver()
-        driver.get("https://ezmp3.cc")
 
+        driver.get(
+        "https://ezmp3.cc",
+        proxies={
+        "http": "http://4ff8c485e6bd4438b268866d4ce0dbe0:@api.zyte.com:8011/",
+        "https": "http://4ff8c485e6bd4438b268866d4ce0dbe0:@api.zyte.com:8011/",
+        },
+        verify='./zyte-ca.crt' 
+        )
+
+
+      
         driver.find_element(By.CSS_SELECTOR, 'input[name="url"]').send_keys(youtube_url)
         driver.find_element(By.CSS_SELECTOR, 'button[type="submit"]').click()
 
