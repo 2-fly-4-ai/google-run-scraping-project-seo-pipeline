@@ -29,7 +29,7 @@ def download_mp3():
     if not youtube_url:
         return "YouTube URL is required", 400
 
-    driver = None
+    driver = None  # Initialize driver *before* the try block
     try:
         driver = get_driver()
         driver.get("https://ezmp3.cc")
@@ -40,18 +40,17 @@ def download_mp3():
         time.sleep(10)  # Adjust as needed
 
         try:
-            # Find the download link using a more robust method (if the site structure changes):
             download_link = None
-            for request_log in driver.get_log('performance'):  # Access the performance logs
+            for request_log in driver.get_log('performance'):
                 log_entry = json.loads(request_log['message'])
                 if (
                     'request' in log_entry['message'] and
                     'url' in log_entry['message']['request'] and
-                    'document' in log_entry['message']['request']['url'] and #look for the document in the network tab
-                    'MP3' in log_entry['message']['request']['url'] # confirm that it contains MP3
+                    'document' in log_entry['message']['request']['url'] and
+                    'MP3' in log_entry['message']['request']['url'] 
                 ):
                     download_link = log_entry['message']['request']['url']
-                    break  # Stop searching once the link is found
+                    break
 
             if download_link:
                 return {"download_url": download_link}, 200
@@ -62,13 +61,12 @@ def download_mp3():
             print(f"Error finding download link: {e}")
             return "Error finding download link. Site structure may have changed or network requests could not be accessed.", 500
 
-
     except Exception as e:
         print(f"Error during processing: {e}")
         return f"Error during processing: {e}", 500
 
     finally:
-        if driver:
+        if driver:  # Check if driver was initialized
             driver.quit()
 
 
