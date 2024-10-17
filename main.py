@@ -21,7 +21,16 @@ def get_driver():
     chrome_options.add_argument('--headless')
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("window-size=1024,768")  # Ensure consistent screenshot size
+
+    # Set the proxy for Chrome
+    proxy = "http://4ff8c485e6bd4438b268866d4ce0dbe0:@api.zyte.com:8011/"
+    chrome_options.add_argument(f'--proxy-server={proxy}')
+
+    # If using a custom certificate, you can disable SSL verification, but note the risks
+    chrome_options.add_argument('--ignore-certificate-errors')
+
     chrome_options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
+    
     driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
     return driver
 
@@ -36,18 +45,9 @@ def download_mp3():
     driver = None
     try:
         driver = get_driver()
+        
+        driver.get("https://ezmp3.cc")
 
-        driver.get(
-        "https://ezmp3.cc",
-        proxies={
-        "http": "http://4ff8c485e6bd4438b268866d4ce0dbe0:@api.zyte.com:8011/",
-        "https": "http://4ff8c485e6bd4438b268866d4ce0dbe0:@api.zyte.com:8011/",
-        },
-        verify='./zyte-ca.crt' 
-        )
-
-
-      
         driver.find_element(By.CSS_SELECTOR, 'input[name="url"]').send_keys(youtube_url)
         driver.find_element(By.CSS_SELECTOR, 'button[type="submit"]').click()
 
