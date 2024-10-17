@@ -5,6 +5,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from flask import Flask, request, jsonify
+from zyte_smartproxy_selenium import webdriver as zyte_webdriver
 import time
 import json
 import base64
@@ -14,6 +15,8 @@ load_dotenv()
 
 app = Flask(__name__)
 
+# Fetch Zyte API Key from .env file
+SPM_APIKEY = os.getenv('SPM_APIKEY')
 
 def get_driver():
     chrome_options = Options()
@@ -21,19 +24,14 @@ def get_driver():
     chrome_options.add_argument('--headless')
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("window-size=1024,768")  # Ensure consistent screenshot size
-
-    # Set the proxy for Chrome
-    proxy = "http://4ff8c485e6bd4438b268866d4ce0dbe0:@api.zyte.com:8011/"
-    chrome_options.add_argument(f'--proxy-server={proxy}')
-
-    # If using a custom certificate, you can disable SSL verification, but note the risks
-    chrome_options.add_argument('--ignore-certificate-errors')
-
     chrome_options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
     
-    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+    # Use Zyte SmartProxy Selenium to initialize Chrome with proxy
+    driver = zyte_webdriver.Chrome(
+        chrome_options=chrome_options,
+        spm_options={'spm_apikey': SPM_APIKEY}
+    )
     return driver
-
 
 @app.route('/download_mp3', methods=['POST'])
 def download_mp3():
@@ -46,15 +44,19 @@ def download_mp3():
     try:
         driver = get_driver()
         
+        # Access the MP3 conversion site
         driver.get("https://ezmp3.cc")
 
+        # Interact with the webpage to input YouTube URL and trigger download
         driver.find_element(By.CSS_SELECTOR, 'input[name="url"]').send_keys(youtube_url)
         driver.find_element(By.CSS_SELECTOR, 'button[type="submit"]').click()
 
-        time.sleep(10)  # Adjust as needed
+        # Wait for the download process to complete
+        time.sleep(10)  # Adjust based on actual timing
 
         download_link = None
         try:
+            # Analyze network requests to find MP3 download URL
             for request_log in driver.get_log('performance'):
                 log_entry = json.loads(request_log['message'])
                 if (
@@ -68,32 +70,26 @@ def download_mp3():
         except Exception as e:
             print(f"Error analyzing network requests: {e}")
 
-
         if download_link:
             return jsonify({"download_url": download_link}), 200
         else:
             print("Download link not found. Taking screenshot.")  # Log the error
             screenshot = driver.get_screenshot_as_png()
             screenshot_base64 = base64.b64encode(screenshot).decode('utf-8')
-            return jsonify({"screenshot": screenshot_base64, "message": "Download link not found"}), 200 # Return 200 with screenshot
-
+            return jsonify({"screenshot": screenshot_base64, "message": "Download link not found"}), 200  # Return 200 with screenshot
 
     except Exception as e:
         print(f"Error during processing: {e}")  # Log the error
         if driver:
             screenshot = driver.get_screenshot_as_png()
             screenshot_base64 = base64.b64encode(screenshot).decode('utf-8')
-            return jsonify({"screenshot": screenshot_base64, "error": str(e)}), 500 # Return 500 with screenshot and error
+            return jsonify({"screenshot": screenshot_base64, "error": str(e)}), 500  # Return 500 with screenshot and error
         else:
-             return jsonify({"error": str(e)}), 500 # Driver initialization failed
-
-
+            return jsonify({"error": str(e)}), 500  # Driver initialization failed
 
     finally:
         if driver:
             driver.quit()
-
-
 
 if __name__ == '__main__':
     server_port = os.environ.get('PORT', '8080')
