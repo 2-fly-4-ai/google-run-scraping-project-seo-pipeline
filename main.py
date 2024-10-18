@@ -17,6 +17,8 @@ app = Flask(__name__)
 
 SPM_APIKEY = os.getenv('SPM_APIKEY')
 
+selenium_wire_storage = os.path.join(os.getcwd(), "selenium_wire")
+
 def get_driver():
     chrome_options = Options()
     chrome_options.add_argument('--no-sandbox')
@@ -27,6 +29,7 @@ def get_driver():
     driver = zyte_webdriver.Chrome(
         options=chrome_options,
         spm_options={
+            'request_storage_base_dir': selenium_wire_storage,
             'spm_apikey': SPM_APIKEY,
             'headers': {
                 'X-Crawlera-No-Bancheck': '1',
