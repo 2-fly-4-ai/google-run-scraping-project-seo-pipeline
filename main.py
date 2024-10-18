@@ -5,6 +5,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from flask import Flask, request, jsonify
+from zyte_smartproxy_selenium import webdriver as zyte_webdriver
 import time
 import json
 import base64
@@ -14,6 +15,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
+SPM_APIKEY = os.getenv('SPM_APIKEY')
 
 def get_driver():
     chrome_options = Options()
@@ -23,8 +25,21 @@ def get_driver():
     chrome_options.add_argument("window-size=1024,768")
     chrome_options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
 
-    driver = webdriver.Chrome(options=chrome_options)   # Correct instantiation
+    # Initialize the Chrome driver with Zyte SmartProxy options
+    driver = zyte_webdriver.Chrome(
+        options=chrome_options,
+        spm_options={
+            'spm_apikey': SPM_APIKEY,
+            'headers': {
+                'X-Crawlera-No-Bancheck': '1',
+                'X-Crawlera-Profile': 'desktop',
+                'X-Crawlera-Cookies': 'disable',
+            }
+        }
+    )
+
     return driver
+
 
 
 @app.route('/download_mp3', methods=['POST'])
