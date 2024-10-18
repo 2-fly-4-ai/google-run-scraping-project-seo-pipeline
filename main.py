@@ -23,11 +23,6 @@ def get_driver():
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--disable-dev-shm-usage')
    
-    # chrome_options.add_argument('--headless')
-    # chrome_options.add_argument("--disable-gpu")
-    # chrome_options.add_argument("window-size=1024,768")
-    # chrome_options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
-
     # Initialize the Chrome driver with Zyte SmartProxy options
     driver = zyte_webdriver.Chrome(
         options=chrome_options,
@@ -42,8 +37,6 @@ def get_driver():
     )
 
     return driver
-
-
 
 @app.route('/download_mp3', methods=['POST'])
 def download_mp3():
@@ -78,32 +71,37 @@ def download_mp3():
         except Exception as e:
             print(f"Error analyzing network requests: {e}")
 
-
         if download_link:
             return jsonify({"download_url": download_link}), 200
         else:
-            print("Download link not found. Taking screenshot.")  # Log the error
+            print("Download link not found. Taking screenshot.")
             screenshot = driver.get_screenshot_as_png()
             screenshot_base64 = base64.b64encode(screenshot).decode('utf-8')
-            return jsonify({"screenshot": screenshot_base64, "message": "Download link not found"}), 200 # Return 200 with screenshot
+            return jsonify({"screenshot": screenshot_base64, "message": "Download link not found"}), 200
 
+    except FileNotFoundError as fnf_error:
+        print(f"FileNotFoundError occurred: {fnf_error}")
+        return jsonify({"error": "File not found error occurred. This might be due to a temporary issue with Selenium Wire."}), 500
 
     except Exception as e:
-        print(f"Error during processing: {e}")  # Log the error
+        print(f"Error during processing: {e}")
         if driver:
-            screenshot = driver.get_screenshot_as_png()
-            screenshot_base64 = base64.b64encode(screenshot).decode('utf-8')
-            return jsonify({"screenshot": screenshot_base64, "error": str(e)}), 500 # Return 500 with screenshot and error
+            try:
+                screenshot = driver.get_screenshot_as_png()
+                screenshot_base64 = base64.b64encode(screenshot).decode('utf-8')
+                return jsonify({"screenshot": screenshot_base64, "error": str(e)}), 500
+            except Exception as screenshot_error:
+                print(f"Error taking screenshot: {screenshot_error}")
+                return jsonify({"error": str(e), "screenshot_error": str(screenshot_error)}), 500
         else:
-             return jsonify({"error": str(e)}), 500 # Driver initialization failed
-
-
+            return jsonify({"error": str(e)}), 500
 
     finally:
         if driver:
-            driver.quit()
-
-
+            try:
+                driver.quit()
+            except Exception as quit_error:
+                print(f"Error during driver.quit(): {quit_error}")
 
 if __name__ == '__main__':
     server_port = os.environ.get('PORT', '8080')
