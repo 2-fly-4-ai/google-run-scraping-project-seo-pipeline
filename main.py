@@ -77,12 +77,14 @@ def download_mp3():
         submit_button.click()
         
         # Wait for the process to start
-        time.sleep(30)  # Adjust based on actual timing
+        # time.sleep(60)  # Adjust based on actual timing
 
 
         download_link = wait_for_download_link(driver)
 
         if download_link:
+            screenshot = driver.get_screenshot_as_png()
+            screenshot_base64 = base64.b64encode(screenshot).decode('utf-8')
             return jsonify({"download_url": download_link, "start_screenshot": start_screenshot_base64}), 200
         else:
             print("Download link not found. Taking screenshot.")  # Log the error
