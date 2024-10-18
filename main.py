@@ -64,9 +64,9 @@ def download_mp3():
             EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[type="submit"]'))
         )
         submit_button.click()
-
-        # Wait for the download process to complete
-        time.sleep(10)  # Adjust based on actual timing
+        
+        # Wait for the process to start
+        time.sleep(30)  # Adjust based on actual timing
 
         download_link = None
         try:
