@@ -27,7 +27,7 @@ def get_driver():
     chrome_options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
 
 
-    service = Service(executable_path=ChromeDriverManager().install())
+    service = Service(ChromeDriverManager().install())
 
     # Use Zyte SmartProxy Selenium to initialize Chrome with proxy
     driver = zyte_webdriver.Chrome(
