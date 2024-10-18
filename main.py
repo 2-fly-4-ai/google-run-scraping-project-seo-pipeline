@@ -19,7 +19,8 @@ def get_driver():
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--disable-dev-shm-usage')
     chrome_options.add_argument('--proxy-server=http://4ff8c485e6bd4438b268866d4ce0dbe0:@api.zyte.com:8011/')
-    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+  
+    driver = webdriver.Chrome(executable_path=ChromeDriverManager().install(), options=chrome_options)
     return driver
 
 @app.route('/download_mp3', methods=['POST'])
