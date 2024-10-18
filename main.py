@@ -85,7 +85,7 @@ def download_mp3():
         if download_link:
             screenshot = driver.get_screenshot_as_png()
             screenshot_base64 = base64.b64encode(screenshot).decode('utf-8')
-            return jsonify({"download_url": download_link, "start_screenshot": start_screenshot_base64}), 200
+            return jsonify({"screenshot": screenshot_base64, "download_url": download_link, "start_screenshot": start_screenshot_base64}), 200
         else:
             print("Download link not found. Taking screenshot.")  # Log the error
             screenshot = driver.get_screenshot_as_png()
