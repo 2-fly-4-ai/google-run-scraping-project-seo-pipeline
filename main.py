@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from seleniumwire import webdriver
+import seleniumwire.undetected_chromedriver as webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -32,7 +32,7 @@ proxy_options = {
 #                 'X-Crawlera-Cookies': 'disable',
 #             }
 
-def wait_for_download_link(driver, timeout=30):
+def wait_for_download_link(driver, timeout=60):
     end_time = time.time() + timeout
     while time.time() < end_time:
         for req in driver.requests:
