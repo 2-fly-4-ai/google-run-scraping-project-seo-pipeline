@@ -9,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from flask import Flask, request, jsonify
 import time
 import base64
+import json
 
 load_dotenv()
 app = Flask(__name__)
@@ -45,47 +46,59 @@ def download_mp3():
     driver = None
     try:
         driver = get_driver()
+        # Access the MP3 conversion site
         driver.get("https://ezmp3.cc")
 
-        # Interact with the website
-        input_field = WebDriverWait(driver, 10).until(
+        # Capture a screenshot at the start of the session
+        start_screenshot = driver.get_screenshot_as_png()
+        start_screenshot_base64 = base64.b64encode(start_screenshot).decode('utf-8')
+
+        # Wait for the input element to be present
+        input_element = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, 'input[name="url"]'))
         )
-        input_field.send_keys(youtube_url)
-        
-        submit_button = WebDriverWait(driver, 10).until(
+        input_element.send_keys(youtube_url)
+
+        # Wait for the submit button to be present and clickable
+        submit_button = WebDriverWait(driver, 20).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[type="submit"]'))
         )
         submit_button.click()
-        
-        # Wait for the download link to appear
-        WebDriverWait(driver, 30).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, 'a[download]'))
-        )
+
+        # Wait for the download process to complete
+        time.sleep(10)  # Adjust based on actual timing
 
         download_link = None
-        for request in driver.requests:
-            if request.response and 'MP3' in request.url:
-                download_link = request.url
-                break
+        try:
+            # Analyze network requests to find MP3 download URL
+            for request_log in driver.get_log('performance'):
+                log_entry = json.loads(request_log['message'])
+                if (
+                    'request' in log_entry['message'] and
+                    'url' in log_entry['message']['request'] and
+                    'document' in log_entry['message']['request']['url'] and
+                    'MP3' in log_entry['message']['request']['url']
+                ):
+                    download_link = log_entry['message']['request']['url']
+                    break
+        except Exception as e:
+            print(f"Error analyzing network requests: {e}")
 
         if download_link:
-            return jsonify({"download_url": download_link}), 200
+            return jsonify({"download_url": download_link, "start_screenshot": start_screenshot_base64}), 200
         else:
-            print("Download link not found. Taking screenshot.")
+            print("Download link not found. Taking screenshot.")  # Log the error
             screenshot = driver.get_screenshot_as_png()
             screenshot_base64 = base64.b64encode(screenshot).decode('utf-8')
-            return jsonify({"screenshot": screenshot_base64, "message": "Download link not found"}), 200
-
+            return jsonify({"screenshot": screenshot_base64, "message": "Download link not found", "start_screenshot": start_screenshot_base64}), 200  # Return 200 with screenshot
     except Exception as e:
-        print(f"Error during processing: {e}")
+        print(f"Error during processing: {e}")  # Log the error
         if driver:
             screenshot = driver.get_screenshot_as_png()
             screenshot_base64 = base64.b64encode(screenshot).decode('utf-8')
-            return jsonify({"screenshot": screenshot_base64, "error": str(e)}), 500
+            return jsonify({"screenshot": screenshot_base64, "error": str(e), "start_screenshot": start_screenshot_base64}), 500  # Return 500 with screenshot and error
         else:
-            return jsonify({"error": str(e)}), 500
-
+            return jsonify({"error": str(e)}), 500  # Driver initialization failed
     finally:
         if driver:
             driver.quit()
