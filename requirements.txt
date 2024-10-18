@@ -11,3 +11,4 @@ webdriver-manager >= 4.0.2
 python-dotenv
 Werkzeug==2.0.0
 zyte-smartproxy-selenium==1.0.10
+blinker==1.7.0
