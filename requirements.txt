@@ -14,3 +14,4 @@ Werkzeug==2.0.0
 blinker==1.7.0
 selenium-wire
 selenium_stealth
+undetected-chromedriver
