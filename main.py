@@ -10,6 +10,7 @@ from flask import Flask, request, jsonify
 import time
 import base64
 import json
+import threading
 
 load_dotenv()
 app = Flask(__name__)
@@ -22,6 +23,16 @@ proxy_options = {
         'no_proxy': 'localhost,127.0.0.1'
     }
 }
+
+
+def wait_for_download_link(driver, timeout=30):
+    end_time = time.time() + timeout
+    while time.time() < end_time:
+        for req in driver.requests:
+            if req.response and 'download' in req.url.lower() and req.response.status_code == 200:
+                return req.url
+        time.sleep(1)
+    return None
 
 def get_driver():
     chrome_options = Options()
@@ -68,21 +79,8 @@ def download_mp3():
         # Wait for the process to start
         time.sleep(30)  # Adjust based on actual timing
 
-        download_link = None
-        try:
-            # Analyze network requests to find MP3 download URL
-            for request_log in driver.get_log('performance'):
-                log_entry = json.loads(request_log['message'])
-                if (
-                    'request' in log_entry['message'] and
-                    'url' in log_entry['message']['request'] and
-                    'document' in log_entry['message']['request']['url'] and
-                    'MP3' in log_entry['message']['request']['url']
-                ):
-                    download_link = log_entry['message']['request']['url']
-                    break
-        except Exception as e:
-            print(f"Error analyzing network requests: {e}")
+
+        download_link = wait_for_download_link(driver)
 
         if download_link:
             return jsonify({"download_url": download_link, "start_screenshot": start_screenshot_base64}), 200
