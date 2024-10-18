@@ -12,7 +12,6 @@ import time
 import base64
 import json
 import threading
-from selenium_stealth import stealth
 
 load_dotenv()
 app = Flask(__name__)
