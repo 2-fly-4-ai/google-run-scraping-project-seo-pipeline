@@ -5,9 +5,10 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from flask import Flask, request, jsonify
 import time
-import json
 import base64
 
 load_dotenv()
@@ -49,9 +50,20 @@ def download_mp3():
         driver.get("https://ezmp3.cc")
 
         # Interact with the website
-        driver.find_element(By.CSS_SELECTOR, 'input[name="url"]').send_keys(youtube_url)
-        driver.find_element(By.CSS_SELECTOR, 'button[type="submit"]').click()
-        time.sleep(10)  # Adjust as needed
+        input_field = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, 'input[name="url"]'))
+        )
+        input_field.send_keys(youtube_url)
+        
+        submit_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[type="submit"]'))
+        )
+        submit_button.click()
+        
+        # Wait for the download link to appear
+        WebDriverWait(driver, 30).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, 'a[download]'))
+        )
 
         download_link = None
         for request in driver.requests:
