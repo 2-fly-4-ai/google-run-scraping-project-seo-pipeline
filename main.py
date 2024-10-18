@@ -7,10 +7,12 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from flask import Flask, request, jsonify
+from selenium_stealth import stealth
 import time
 import base64
 import json
 import threading
+from selenium_stealth import stealth
 
 load_dotenv()
 app = Flask(__name__)
@@ -23,6 +25,12 @@ proxy_options = {
         'no_proxy': 'localhost,127.0.0.1'
     }
 }
+
+# 'headers': {
+#                 'X-Crawlera-No-Bancheck': '1',
+#                 'X-Crawlera-Profile': 'desktop',
+#                 'X-Crawlera-Cookies': 'disable',
+#             }
 
 def wait_for_download_link(driver, timeout=30):
     end_time = time.time() + timeout
@@ -42,6 +50,17 @@ def get_driver():
         options=chrome_options,
         seleniumwire_options=proxy_options
     )
+    
+    # Apply stealth settings
+    stealth(driver,
+        languages=["en-US", "en"],
+        vendor="Google Inc.",
+        platform="Win32",
+        webgl_vendor="Intel Inc.",
+        renderer="Intel Iris OpenGL Engine",
+        fix_hairline=True,
+    )
+    
     return driver
 
 @app.route('/download_mp3', methods=['POST'])
