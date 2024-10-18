@@ -37,7 +37,11 @@ def wait_for_download_link(driver, timeout=60):
 def get_driver():
     chrome_options = Options()
     chrome_options.add_argument('--no-sandbox')
+    
     chrome_options.add_argument('--headless')
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled") 
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"]) 
+    chrome_options.add_experimental_option("useAutomationExtension", False) 
     chrome_options.add_argument("--enable-features=NetworkService,NetworkServiceInProcess")
     chrome_options.add_argument('--disable-dev-shm-usage')
     driver = webdriver.Chrome(
