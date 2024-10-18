@@ -6,6 +6,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from flask import Flask, request, jsonify
 from zyte_smartproxy_selenium import webdriver as zyte_webdriver
+from selenium.webdriver.chrome.service import Service
 import time
 import json
 import base64
@@ -25,9 +26,12 @@ def get_driver():
     chrome_options.add_argument("window-size=1024,768")  # Ensure consistent screenshot size
     chrome_options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
 
+
+    service = Service(executable_path=ChromeDriverManager().install())
+
     # Use Zyte SmartProxy Selenium to initialize Chrome with proxy
     driver = zyte_webdriver.Chrome(
-        executable_path=ChromeDriverManager().install(),
+        service=service,
         options=chrome_options,
         spm_options={
             'spm_apikey': SPM_APIKEY,
