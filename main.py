@@ -20,9 +20,10 @@ def get_driver():
     chrome_options.add_argument('--no-sandbox')
     chrome_options.add_argument('--headless')
     chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("window-size=1024,768")  # Ensure consistent screenshot size
+    chrome_options.add_argument("window-size=1024,768")
     chrome_options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
-    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+
+    driver = webdriver.Chrome(options=chrome_options)   # Correct instantiation
     return driver
 
 
