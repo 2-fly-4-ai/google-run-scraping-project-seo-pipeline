@@ -24,9 +24,11 @@ def get_driver():
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("window-size=1024,768")  # Ensure consistent screenshot size
     chrome_options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
+
     # Use Zyte SmartProxy Selenium to initialize Chrome with proxy
     driver = zyte_webdriver.Chrome(
-        # chrome_options=chrome_options,
+        executable_path=ChromeDriverManager().install(),
+        options=chrome_options,
         spm_options={
             'spm_apikey': SPM_APIKEY,
             'block_ads': False,
@@ -37,6 +39,7 @@ def get_driver():
             }
         }
     )
+
     return driver
 
 @app.route('/download_mp3', methods=['POST'])
