@@ -6,7 +6,8 @@ import json
 import threading
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
-from seleniumwire import webdriver
+# from seleniumwire import webdriver
+import seleniumwire.undetected_chromedriver as webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -24,8 +25,6 @@ proxy_options = {
         'no_proxy': 'localhost,127.0.0.1'
     }
 }
-
-agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
 
 def wait_for_download_link(driver, timeout=60):
     end_time = time.time() + timeout
@@ -46,10 +45,12 @@ def get_driver():
     chrome_options.add_experimental_option("useAutomationExtension", False) 
     chrome_options.add_argument("--enable-features=NetworkService,NetworkServiceInProcess")
     chrome_options.add_argument('--disable-dev-shm-usage')
+    capabilities = chrome_options.to_capabilities()         #cap
+    capabilities['acceptInsecureCerts'] = True              #cap
+    
     driver = webdriver.Chrome(
         options=chrome_options,
         seleniumwire_options=proxy_options,
-        agent=agent
     )
     
     # Apply stealth settings
