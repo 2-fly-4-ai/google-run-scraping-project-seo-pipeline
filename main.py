@@ -25,6 +25,8 @@ proxy_options = {
     }
 }
 
+agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
+
 def wait_for_download_link(driver, timeout=60):
     end_time = time.time() + timeout
     while time.time() < end_time:
@@ -47,6 +49,7 @@ def get_driver():
     driver = webdriver.Chrome(
         options=chrome_options,
         seleniumwire_options=proxy_options,
+        agent=agent
     )
     
     # Apply stealth settings
