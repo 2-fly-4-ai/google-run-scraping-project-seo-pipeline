@@ -13,6 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium_stealth import stealth
 from bs4 import BeautifulSoup
+import time
 
 load_dotenv()
 app = Flask(__name__)
@@ -82,7 +83,11 @@ def scrape_html():
         driver = get_driver()
         driver.get(url)
         # cf_manual_solver(driver)
+
+        time.sleep(3)
+
         html_content = driver.page_source
+       
 
         # Parse the HTML content using BeautifulSoup
         soup = BeautifulSoup(html_content, 'html.parser')
