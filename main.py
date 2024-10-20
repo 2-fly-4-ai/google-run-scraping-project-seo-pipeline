@@ -95,7 +95,7 @@ def scrape_html():
         # Extract all header tags (h1, h2, h3, etc.) and paragraph tags (p)
         content_tags = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'])
 
-        for script_or_style in soup(['style', 'script', 'noscript', 'iframe', 'object', 'embed', 'applet', 'audio', 'video', 'link', 'meta', 'svg', 'canvas', 'map', 'area', 'param', 'source', 'track', 'base','nav', 'footer', 'header', 'aside', ]):
+        for script_or_style in soup(['class','style', 'script', 'noscript', 'iframe', 'object', 'embed', 'applet', 'audio', 'video', 'link', 'meta', 'svg', 'canvas', 'map', 'area', 'param', 'source', 'track', 'base','nav', 'footer', 'header', 'aside', ]):
             script_or_style.decompose()
     
 
