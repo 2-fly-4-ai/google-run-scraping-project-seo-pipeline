@@ -90,7 +90,7 @@ def cf_manual_solver(driver) -> None:
 def clean_html_with_openai(html_content):
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that cleans and summarizes HTML content."},
                 {"role": "user", "content": f"Please clean the following HTML content, removing any unnecessary elements and focusing on the main text content related to the subject, make sure you output in html aswell:\n\n{html_content}"}
