@@ -127,7 +127,7 @@ def scrape_html():
 
         time.sleep(2)
 
-        driver.execute_script("window.scrollTo(0, 200);")
+        driver.execute_script("window.scrollTo(0, 600);")
         time.sleep(2) # Wait for the page to load
 
         html_content = driver.page_source
@@ -144,7 +144,7 @@ def scrape_html():
             tag.attrs = {}
 
         # Extract all header tags (h1, h2, h3, etc.) and paragraph tags (p)
-        content_tags = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'])
+        content_tags = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p','ul'])
 
         # Extract the cleaned content
         cleaned_html = ''.join(str(tag) for tag in content_tags)
