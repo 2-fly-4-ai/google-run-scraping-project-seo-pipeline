@@ -88,27 +88,22 @@ def scrape_html():
 
         html_content = driver.page_source
        
-
         # Parse the HTML content using BeautifulSoup
         soup = BeautifulSoup(html_content, 'html.parser')
+
+        # Remove script and style elements
+        for script_or_style in soup(['script', 'style', 'noscript', 'iframe', 'object', 'embed', 'applet', 'audio', 'video', 'svg', 'canvas']):
+            script_or_style.decompose()
+
+        # Remove all attributes from remaining tags
+        for tag in soup.find_all(True):
+            tag.attrs = {}
 
         # Extract all header tags (h1, h2, h3, etc.) and paragraph tags (p)
         content_tags = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'])
 
-        for script_or_style in soup(['class','style', 'script', 'noscript', 'iframe', 'object', 'embed', 'applet', 'audio', 'video', 'link', 'meta', 'svg', 'canvas', 'map', 'area', 'param', 'source', 'track', 'base','nav', 'footer', "target" 'header', 'aside' ]):
-            script_or_style.decompose()
-    
-        for tag in soup.find_all(['div', "p", "h1", "h2", "h3", "h4","h5", "h6"]):  # Adjust this list to the tags you want to clean
-    # Replace the contents with an empty string
-            tag.string = "" 
-
-        # Remove any style tags and script
-
         # Extract the cleaned content
         cleaned_html = ''.join(str(tag) for tag in content_tags)
-
-
-
 
         return jsonify({"html": cleaned_html}), 200
     except Exception as e:
@@ -121,5 +116,3 @@ def scrape_html():
 if __name__ == '__main__':
     server_port = os.environ.get('PORT', '8080')
     app.run(debug=False, port=server_port, host='0.0.0.0')
-
-# curl -X POST -F 'url=https://example.com' https://scraper-url-html-30316204799.us-central1.run.app/scrape_html
