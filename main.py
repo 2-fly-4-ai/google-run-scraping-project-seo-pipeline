@@ -13,11 +13,15 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium_stealth import stealth
 from bs4 import BeautifulSoup
+from functools import wraps
 import time
+import openai
 
 load_dotenv()
 app = Flask(__name__)
 apiKey = os.getenv('SPM_APIKEY')
+openai.api_key = os.getenv('OPENAI_API_KEY')
+API_KEY = os.getenv('API_KEY')  # Add this line to load the API key
 
 # Proxy configuration
 proxy_options = {
@@ -27,6 +31,17 @@ proxy_options = {
         'no_proxy': 'localhost,127.0.0.1'
     }
 }
+
+# API key authentication decorator
+def require_api_key(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        provided_api_key = request.headers.get('X-API-Key') or request.args.get('api_key')
+        if provided_api_key and provided_api_key == API_KEY:
+            return f(*args, **kwargs)
+        else:
+            return jsonify({"error": "Invalid or missing API key"}), 401
+    return decorated_function
 
 def get_driver():
     chrome_options = Options()
@@ -72,7 +87,28 @@ def cf_manual_solver(driver) -> None:
     except Exception as err:
         print(f'Failed to solve CAPTCHA: {err}')
 
+def clean_html_with_openai(html_content):
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that cleans and summarizes HTML content."},
+                {"role": "user", "content": f"Please clean the following HTML content, removing any unnecessary elements and focusing on the main text content related to the subject, make sure you output in html aswell:\n\n{html_content}"}
+            ],
+            max_tokens=1000,
+            n=1,
+            stop=None,
+            temperature=0.5,
+        )
+        
+        cleaned_content = response.choices[0].message['content'].strip()
+        return cleaned_content
+    except Exception as e:
+        print(f"Error in OpenAI API call: {e}")
+        return html_content  # Return original content if OpenAI cleaning fails
+
 @app.route('/scrape_html', methods=['POST'])
+@require_api_key 
 def scrape_html():
     url = request.form.get('url')
     if not url:
@@ -105,7 +141,10 @@ def scrape_html():
         # Extract the cleaned content
         cleaned_html = ''.join(str(tag) for tag in content_tags)
 
-        return jsonify({"html": cleaned_html}), 200
+        # Clean the HTML content using OpenAI
+        final_cleaned_content = clean_html_with_openai(cleaned_html)
+
+        return jsonify({"html": final_cleaned_content}), 200
     except Exception as e:
         print(f"Error during processing: {e}")
         return jsonify({"error": str(e)}), 500
