@@ -92,13 +92,13 @@ def clean_html_with_openai(html_content):
         response = openai.ChatCompletion.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You are a helpful assistant that cleans and summarizes HTML content."},
-                {"role": "user", "content": f"Please clean the following HTML content, removing any unnecessary elements and focusing on the main text content related to the subject, make sure you output in html aswell:\n\n{html_content}"}
+                {"role": "system", "content": "You are a helpful assistant that cleans HTML content and extract the main content while removing other elements."},
+                {"role": "user", "content": f"Clean the following HTML content, removing any unnecessary elements nto related to the content and focusing on the main text content related to the subject, make sure you output in html aswell:\n\n{html_content}"}
             ],
-            max_tokens=1000,
+            max_tokens=5000,
             n=1,
             stop=None,
-            temperature=0.5,
+            temperature=0.8,
         )
         
         cleaned_content = response.choices[0].message['content'].strip()
