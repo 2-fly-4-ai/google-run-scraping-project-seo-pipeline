@@ -12,6 +12,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium_stealth import stealth
+from bs4 import BeautifulSoup
 
 load_dotenv()
 app = Flask(__name__)
@@ -35,7 +36,6 @@ def get_driver():
         options=chrome_options,
         seleniumwire_options=proxy_options,
     )
-
     stealth(driver,
             languages=["en-US", "en"],
             vendor="Google Inc.",
@@ -82,7 +82,21 @@ def scrape_html():
         driver.get(url)
         cf_manual_solver(driver)
         html_content = driver.page_source
-        return jsonify({"html": html_content}), 200
+
+        # Parse the HTML content using BeautifulSoup
+        soup = BeautifulSoup(html_content, 'html.parser')
+
+        # Extract all header tags (h1, h2, h3, etc.) and paragraph tags (p)
+        content_tags = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'])
+
+        # Remove any style tags and scripts
+        for script_or_style in soup(['style', 'script']):
+            script_or_style.decompose()
+
+        # Extract the cleaned content
+        cleaned_html = ''.join(str(tag) for tag in content_tags)
+
+        return jsonify({"html": cleaned_html}), 200
     except Exception as e:
         print(f"Error during processing: {e}")
         return jsonify({"error": str(e)}), 500
@@ -94,4 +108,5 @@ if __name__ == '__main__':
     server_port = os.environ.get('PORT', '8080')
     app.run(debug=False, port=server_port, host='0.0.0.0')
 
+# Example usage:
 # curl -X POST -F 'url=https://example.com' https://scraper-url-html-30316204799.us-central1.run.app/scrape_html
