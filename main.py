@@ -106,7 +106,7 @@ def clean_html_with_openai(html_content):
             temperature=0.8,
         )
         
-        cleaned_content = response.choices[0].message['content'].strip()
+        cleaned_content = response.choices[0].message.content
         return cleaned_content
     except Exception as e:
         print(f"Error in OpenAI API call: {e}")
