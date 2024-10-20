@@ -14,6 +14,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium_stealth import stealth
 from bs4 import BeautifulSoup
 from functools import wraps
+from selenium.webdriver.support.ui import WebDriverWait
 import time
 import openai
 
@@ -121,14 +122,21 @@ def scrape_html():
 
     driver = None
     try:
-        driver = get_driver()
-        driver.get(url)
-        # cf_manual_solver(driver)
 
-        time.sleep(2)
+        driver = get_driver()
+     
+
+        driver.get(url)
+
+        WebDriverWait(driver, 100).until(lambda driver: driver.execute_script('return document.readyState') == 'complete')
+        
+      
+       
+        # cf_manual_solver(driver)
+       
 
         driver.execute_script("window.scrollTo(0, 600);")
-        time.sleep(2) # Wait for the page to load
+        time.sleep(5) # Wait for the page to load
 
         html_content = driver.page_source
        
