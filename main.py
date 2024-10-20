@@ -30,12 +30,9 @@ def get_driver():
     chrome_options = Options()
     chrome_options.add_argument('--headless')
     chrome_options.add_argument('--disable-dev-shm-usage')
-    capabilities = chrome_options.to_capabilities()
-    capabilities['acceptInsecureCerts'] = True
-
     driver = webdriver.Chrome(
         options=chrome_options,
-        desired_capabilities=capabilities,
+      
         seleniumwire_options=proxy_options,
     )
 
