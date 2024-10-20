@@ -6,7 +6,7 @@ import json
 import threading
 from dotenv import load_dotenv
 from flask import Flask, request, jsonify
-import seleniumwire.undetected_chromedriver as webdriver
+from seleniumwire import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -96,3 +96,5 @@ def scrape_html():
 if __name__ == '__main__':
     server_port = os.environ.get('PORT', '8080')
     app.run(debug=False, port=server_port, host='0.0.0.0')
+
+# curl -X POST -F 'url=https://example.com' https://scraper-url-html-30316204799.us-central1.run.app/scrape_html
