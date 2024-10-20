@@ -125,7 +125,10 @@ def scrape_html():
         driver.get(url)
         # cf_manual_solver(driver)
 
-        time.sleep(5)
+        time.sleep(2)
+
+        driver.execute_script("window.scrollTo(0, 200);")
+        time.sleep(2) # Wait for the page to load
 
         html_content = driver.page_source
        
