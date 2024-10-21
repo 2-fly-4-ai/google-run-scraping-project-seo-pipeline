@@ -136,7 +136,7 @@ def scrape_html():
         if "reddit.com" in url:
               wait.until(EC.presence_of_element_located((By.ID, "comment-tree")))
 
-        driver.execute_script("window.scrollTo(0, 600);")
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight")
         html_content = driver.page_source
        
         # Parse the HTML content using BeautifulSoup
