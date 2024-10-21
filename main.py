@@ -147,7 +147,7 @@ def scrape_html():
         # Extract the cleaned content (modified section)
         h1_count = 0
         content_tags = []
-        for tag in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p']):
+        for tag in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'ol', 'ul']):
             if tag.name == 'h1' and tag.string:  # Check for non-empty content
                 h1_count += 1
             if h1_count > 1:
