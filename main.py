@@ -124,9 +124,11 @@ def scrape_html():
     try:
 
         driver = get_driver()
-        driver.wait_for_request(timeout=10)
+      
 
-        WebDriverWait(driver, 100).until(lambda driver: driver.execute_script('return document.readyState') == 'complete')
+        wait = WebDriverWait(driver, timeout=2)
+
+        wait.until(lambda driver: driver.execute_script('return document.readyState') == 'complete')
         
         time.sleep(5)
         driver.get(url)
