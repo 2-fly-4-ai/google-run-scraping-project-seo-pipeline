@@ -154,13 +154,13 @@ def scrape_html():
                 break  # Stop processing after the second h1
             content_tags.append(tag)
 
-        last_p_index = 0
-        for i, tag in enumerate(content_tags):
-            if tag.name == 'p':
-                last_p_index = i
+        # last_p_index = 0
+        # for i, tag in enumerate(content_tags):
+        #     if tag.name == 'p':
+        #         last_p_index = i
         
-        # Cut off the HTML after the last <p> tag
-        content_tags = content_tags[:last_p_index + 1]
+        # # Cut off the HTML after the last <p> tag
+        # content_tags = content_tags[:last_p_index + 1]
 
         # Find <ul> and <ol> tags within <p> or <h1>-<h6> tags
         # content_tags = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p',"ul","ol"])
