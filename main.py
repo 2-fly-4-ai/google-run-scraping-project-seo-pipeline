@@ -90,6 +90,81 @@ def cf_manual_solver(driver) -> None:
         print(f'Failed to solve CAPTCHA: {err}')
 
 
+
+
+
+@app.route('/scrape_html', methods=['POST'])
+@require_api_key
+def scrape_html():
+    url = request.form.get('url')
+    if not url:
+        return jsonify({"error": "URL is required"}), 400
+    driver = None
+    try:
+        driver = get_driver()
+        driver.get(url)
+        # cf_manual_solver(driver)  # You can uncomment this if you need to solve Cloudflare CAPTCHAs
+
+        html_content = driver.page_source
+
+        # LETS DO IT HERE
+        # Parse the HTML content using BeautifulSoup
+        soup = BeautifulSoup(html_content, 'html.parser')
+
+        h1_tag = soup.find('h1')
+        last_p_tag = soup.find_all('p')[-1]  # Find the last <p> tag
+
+        if h1_tag and last_p_tag:
+            # Get the HTML between the first <h1> and the last <p>
+            cleaned_html = str(h1_tag).replace("\n", "")
+
+
+            for script_or_style in soup(['script', 'style', 'noscript', 'iframe', 'object', 'embed', 'applet', 'audio',
+                                    'video', 'svg', 'canvas']):
+                script_or_style.decompose()
+
+            for tag in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p']):
+                if tag == last_p_tag:
+                    cleaned_html += str(tag).replace("\n", "")
+            cleaned_html = re.sub(r"\s+", " ", cleaned_html).replace("\n", "") 
+
+        if not h1_tag or not last_p_tag:
+            return jsonify({"error": "Could not find necessary HTML tags."}), 400
+        # Remove script and style elements
+       
+
+        # Remove all attributes from remaining tags
+        for tag in soup.find_all(True):
+            tag.attrs = {}
+
+        # Extract the cleaned content (modified section)
+        h1_count = 0
+        content_tags = []
+        for tag in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p']):
+            if tag.name == 'h1' and tag.string:  # Check for non-empty content
+                h1_count += 1
+            if h1_count > 1:
+                break  # Stop processing after the second h1
+            content_tags.append(tag)
+
+
+        # Extract the cleaned content
+        cleaned_html = ''.join(str(tag) for tag in content_tags).replace("\n", "")
+        cleaned_html = re.sub(r"\s+", " ", cleaned_html).replace("\n", "")  # Replace multiple spaces with a single space
+
+
+
+        # Clean the HTML with OpenAI
+        # cleaned_html = clean_html_with_openai(cleaned_html)
+
+        return jsonify({"html": cleaned_html}), 200
+    except Exception as e:
+        print(f"Error during processing: {e}")
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if driver:
+            driver.quit()
+
 def clean_html_with_openai(html_content):
     try:
         client = openai.OpenAI()
@@ -115,72 +190,6 @@ def clean_html_with_openai(html_content):
     except Exception as e:
         print(f"Error in OpenAI API call: {e}")
         return html_content  # Return original content if OpenAI cleaning fails
-
-
-@app.route('/scrape_html', methods=['POST'])
-@require_api_key
-def scrape_html():
-    url = request.form.get('url')
-    if not url:
-        return jsonify({"error": "URL is required"}), 400
-    driver = None
-    try:
-        driver = get_driver()
-        driver.get(url)
-        # cf_manual_solver(driver)  # You can uncomment this if you need to solve Cloudflare CAPTCHAs
-
-
-        html_content = driver.page_source
-
-        # Parse the HTML content using BeautifulSoup
-        soup = BeautifulSoup(html_content, 'html.parser')
-
-        # Remove script and style elements
-        for script_or_style in soup(['script', 'style', 'noscript', 'iframe', 'object', 'embed', 'applet', 'audio',
-                                    'video', 'svg', 'canvas']):
-            script_or_style.decompose()
-
-        # Remove all attributes from remaining tags
-        for tag in soup.find_all(True):
-            tag.attrs = {}
-
-        # Extract the cleaned content (modified section)
-        h1_count = 0
-        content_tags = []
-        for tag in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'ol', 'ul']):
-            if tag.name == 'h1' and tag.string:  # Check for non-empty content
-                h1_count += 1
-            if h1_count > 1:
-                break  # Stop processing after the second h1
-            content_tags.append(tag)
-
-        # last_p_index = 0
-        # for i, tag in enumerate(content_tags):
-        #     if tag.name == 'p':
-        #         last_p_index = i
-        
-        # # Cut off the HTML after the last <p> tag
-        # content_tags = content_tags[:last_p_index + 1]
-
-        # Find <ul> and <ol> tags within <p> or <h1>-<h6> tags
-        # content_tags = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p',"ul","ol"])
-
-        # Extract the cleaned content
-        cleaned_html = ''.join(str(tag) for tag in content_tags).replace("\n", "")
-        cleaned_html = re.sub(r"\s+", " ", cleaned_html).replace("\n", "")  # Replace multiple spaces with a single space
-
-
-        # Clean the HTML with OpenAI
-        # cleaned_html = clean_html_with_openai(cleaned_html)
-
-        return jsonify({"html": cleaned_html}), 200
-    except Exception as e:
-        print(f"Error during processing: {e}")
-        return jsonify({"error": str(e)}), 500
-    finally:
-        if driver:
-            driver.quit()
-
 
 if __name__ == '__main__':
     server_port = os.environ.get('PORT', '8080')
