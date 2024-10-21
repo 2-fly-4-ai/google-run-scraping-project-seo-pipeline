@@ -126,14 +126,19 @@ def scrape_html():
         driver = get_driver()
       
 
-        wait = WebDriverWait(driver, timeout=2)
 
-        wait.until(lambda driver: driver.execute_script('return document.readyState') == 'complete')
         
         time.sleep(5)
         driver.get(url)
         # cf_manual_solver(driver)
-       
+
+        wait = WebDriverWait(driver, timeout=2)
+
+        wait.until(lambda driver: driver.execute_script('return document.readyState') == 'complete')
+          # LETS IMPLEMENT THIS LOGIC. If the website is a redit url. Then we shoud add this 
+
+        if "reddit.com" in url:
+            wait.until(EC.presence_of_all_elements_located((By.XPATH, "//div[@data-testid='post-comment-header']/parent::div")))
 
         driver.execute_script("window.scrollTo(0, 600);")
         html_content = driver.page_source
