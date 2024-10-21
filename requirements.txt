@@ -1,3 +1,4 @@
+setuptools
 selenium==4.25.0
 chromedriver-binary==93.0.4577.63
 requests
