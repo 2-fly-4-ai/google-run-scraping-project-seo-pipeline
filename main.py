@@ -130,32 +130,33 @@ def scrape_html():
         if "reddit.com" in url:
             wait.until(EC.presence_of_element_located((By.ID, "-post-rtjson-content")))
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
-            html_content = driver.page_source
+            
 
+        html_content = driver.page_source
             # Parse the HTML content using BeautifulSoup
-            soup = BeautifulSoup(html_content, 'html.parser')
+        soup = BeautifulSoup(html_content, 'html.parser')
 
             # Remove script and style elements
-            for script_or_style in soup(['script', 'style', 'noscript', 'iframe', 'object', 'embed', 'applet', 'audio', 'video', 'svg', 'canvas']):
+        for script_or_style in soup(['script', 'style', 'noscript', 'iframe', 'object', 'embed', 'applet', 'audio', 'video', 'svg', 'canvas']):
                 script_or_style.decompose()
 
             # Remove all attributes from remaining tags
-            for tag in soup.find_all(True):
-                tag.attrs = {}
+        for tag in soup.find_all(True):
+            tag.attrs = {}
 
             # Extract the cleaned content (modified section)
-            h1_count = 0
-            content_tags = []
-            for tag in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p']):
+        h1_count = 0
+        content_tags = []
+        for tag in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p']):
                 if tag.name == 'h1' and tag.string:  # Check for non-empty content
                     h1_count += 1
                     if h1_count > 1:
                         break  # Stop processing after the second h1
                 content_tags.append(tag)
 
-            cleaned_html = ''.join(str(tag) for tag in content_tags).replace("\n", "")
-            cleaned_html = re.sub(r"\s+", " ", cleaned_html)  # Replace multiple spaces with a single space
-            return jsonify({"html": cleaned_html}), 200
+        cleaned_html = ''.join(str(tag) for tag in content_tags).replace("\n", "")
+        cleaned_html = re.sub(r"\s+", " ", cleaned_html)  # Replace multiple spaces with a single space
+        return jsonify({"html": cleaned_html}), 200
 
 
     except Exception as e:
