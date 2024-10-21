@@ -132,13 +132,13 @@ def scrape_html():
         driver.get(url)
         # cf_manual_solver(driver)
 
-        # wait = WebDriverWait(driver, timeout=2)
+        wait = WebDriverWait(driver, timeout=2)
 
         # wait.until(lambda driver: driver.execute_script('return document.readyState') == 'complete')
         #   # LETS IMPLEMENT THIS LOGIC. If the website is a redit url. Then we shoud add this 
 
-        # if "reddit.com" in url:
-        #     wait.until(EC.presence_of_all_elements_located((By.XPATH, "//div[@data-testid='post-comment-header']/parent::div")))
+        if "reddit.com" in url:
+            wait.until(EC.presence_of_all_elements_located((By.XPATH, "//div[@data-testid='post-comment-header']/parent::div")))
 
         driver.execute_script("window.scrollTo(0, 600);")
         html_content = driver.page_source
@@ -158,7 +158,7 @@ def scrape_html():
         content_tags = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'])
 
         # Extract the cleaned content
-        cleaned_html = ''.join(str(tag) for tag in content_tags)
+        cleaned_html = ''.join(str(tag) for tag in content_tags).replace("\n","")
 
         # Clean the HTML content using OpenAI
         # final_cleaned_content = clean_html_with_openai(cleaned_html)
