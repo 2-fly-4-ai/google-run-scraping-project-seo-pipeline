@@ -161,9 +161,9 @@ def scrape_html():
         cleaned_html = ''.join(str(tag) for tag in content_tags)
 
         # Clean the HTML content using OpenAI
-        final_cleaned_content = clean_html_with_openai(cleaned_html)
+        # final_cleaned_content = clean_html_with_openai(cleaned_html)
 
-        return jsonify({"html": final_cleaned_content}), 200
+        return jsonify({"html": cleaned_html}), 200
     except Exception as e:
         print(f"Error during processing: {e}")
         return jsonify({"error": str(e)}), 500
