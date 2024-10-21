@@ -134,7 +134,7 @@ def scrape_html():
         #   # LETS IMPLEMENT THIS LOGIC. If the website is a redit url. Then we shoud add this 
 
         if "reddit.com" in url:
-              wait.until(EC.presence_of_element_located((By.ID, "comment-tree")))
+              wait.until(EC.presence_of_element_located((By.ID, "-post-rtjson-content")))
 
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
         html_content = driver.page_source
