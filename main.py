@@ -134,7 +134,7 @@ def scrape_html():
         #   # LETS IMPLEMENT THIS LOGIC. If the website is a redit url. Then we shoud add this 
 
         if "reddit.com" in url:
-              comment_tree = wait.until(EC.presence_of_element_located((By.ID, "comment-tree")))
+              wait.until(EC.presence_of_element_located((By.ID, "comment-tree")))
 
         driver.execute_script("window.scrollTo(0, 600);")
         html_content = driver.page_source
@@ -154,7 +154,8 @@ def scrape_html():
         content_tags = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'])
 
         # Extract the cleaned content
-        cleaned_html = ''.join(str(tag) for tag in content_tags).replace("\n","")
+        cleaned_html = ''.join(str(tag) for tag in content_tags).replace("\n", "")
+        cleaned_html = re.sub(r"\s+", " ", cleaned_html)  # Replace multiple spaces with a single space
 
         # Clean the HTML content using OpenAI
         # final_cleaned_content = clean_html_with_openai(cleaned_html)
