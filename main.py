@@ -114,53 +114,50 @@ def clean_html_with_openai(html_content):
         return html_content  # Return original content if OpenAI cleaning fails
 
 @app.route('/scrape_html', methods=['POST'])
-@require_api_key 
+@require_api_key
 def scrape_html():
     url = request.form.get('url')
     if not url:
         return jsonify({"error": "URL is required"}), 400
-
     driver = None
     try:
-
         driver = get_driver()
-      
         driver.get(url)
         # cf_manual_solver(driver)
-
         wait = WebDriverWait(driver, timeout=2)
-
         # wait.until(lambda driver: driver.execute_script('return document.readyState') == 'complete')
-        #   # LETS IMPLEMENT THIS LOGIC. If the website is a redit url. Then we shoud add this 
-
+        #  # LETS IMPLEMENT THIS LOGIC. If the website is a redit url. Then we shoud add this
         if "reddit.com" in url:
-              wait.until(EC.presence_of_element_located((By.ID, "-post-rtjson-content")))
+            wait.until(EC.presence_of_element_located((By.ID, "-post-rtjson-content")))
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
+            html_content = driver.page_source
 
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
-        html_content = driver.page_source
-       
-        # Parse the HTML content using BeautifulSoup
-        soup = BeautifulSoup(html_content, 'html.parser')
+            # Parse the HTML content using BeautifulSoup
+            soup = BeautifulSoup(html_content, 'html.parser')
 
-        # Remove script and style elements
-        for script_or_style in soup(['script', 'style', 'noscript', 'iframe', 'object', 'embed', 'applet', 'audio', 'video', 'svg', 'canvas']):
-            script_or_style.decompose()
+            # Remove script and style elements
+            for script_or_style in soup(['script', 'style', 'noscript', 'iframe', 'object', 'embed', 'applet', 'audio', 'video', 'svg', 'canvas']):
+                script_or_style.decompose()
 
-        # Remove all attributes from remaining tags
-        for tag in soup.find_all(True):
-            tag.attrs = {}
+            # Remove all attributes from remaining tags
+            for tag in soup.find_all(True):
+                tag.attrs = {}
 
-        # Extract all header tags (h1, h2, h3, etc.) and paragraph tags (p)
-        content_tags = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'])
+            # Extract the cleaned content (modified section)
+            h1_count = 0
+            content_tags = []
+            for tag in soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p']):
+                if tag.name == 'h1' and tag.string:  # Check for non-empty content
+                    h1_count += 1
+                    if h1_count > 1:
+                        break  # Stop processing after the second h1
+                content_tags.append(tag)
 
-        # Extract the cleaned content
-        cleaned_html = ''.join(str(tag) for tag in content_tags).replace("\n", "")
-        cleaned_html = re.sub(r"\s+", " ", cleaned_html)  # Replace multiple spaces with a single space
+            cleaned_html = ''.join(str(tag) for tag in content_tags).replace("\n", "")
+            cleaned_html = re.sub(r"\s+", " ", cleaned_html)  # Replace multiple spaces with a single space
+            return jsonify({"html": cleaned_html}), 200
 
-        # Clean the HTML content using OpenAI
-        # final_cleaned_content = clean_html_with_openai(cleaned_html)
 
-        return jsonify({"html": cleaned_html}), 200
     except Exception as e:
         print(f"Error during processing: {e}")
         return jsonify({"error": str(e)}), 500
@@ -171,3 +168,5 @@ def scrape_html():
 if __name__ == '__main__':
     server_port = os.environ.get('PORT', '8080')
     app.run(debug=False, port=server_port, host='0.0.0.0')
+
+
