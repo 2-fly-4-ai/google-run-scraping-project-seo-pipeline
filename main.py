@@ -155,7 +155,7 @@ def scrape_html():
             tag.attrs = {}
 
         # Extract all header tags (h1, h2, h3, etc.) and paragraph tags (p)
-        content_tags = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p','ul'])
+        content_tags = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p'])
 
         # Extract the cleaned content
         cleaned_html = ''.join(str(tag) for tag in content_tags)
